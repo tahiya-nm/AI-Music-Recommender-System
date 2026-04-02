@@ -17,17 +17,33 @@ Replace this paragraph with your own summary of what your version does.
 
 ## How The System Works
 
-Explain your design in plain language.
+### How Real-World Recommenders Work
 
-Some prompts to answer:
+Real music recommenders blend two strategies:
+- **Collaborative filtering** — "users like you also liked X" — finds patterns across millions of listeners
+- **Content-based filtering** — matches songs to a taste profile using measurable audio features
 
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
+Both reduce to the same output: a score per song, then a ranked list.
 
-You can include a simple diagram or bullet list if helpful.
+### What This Version Prioritizes
+
+This simulation uses **pure content-based filtering** — no listening history, no other users. Priorities in order: genre match → mood match → energy proximity → acoustic preference. Energy is scored by closeness to the user's target (not by raw magnitude), using a Gaussian bell curve.
+
+### Features Used
+
+**Song:** `genre` (string), `mood` (string), `energy` (float 0–1), `acousticness` (float 0–1). Fields `tempo_bpm`, `valence`, and `danceability` are stored but not yet scored.
+
+**UserProfile:** `favorite_genre`, `favorite_mood`, `target_energy` (float 0–1), `likes_acoustic` (bool).
+
+### Scoring and Ranking
+
+```
+score = 0.35 × genre_match + 0.25 × mood_match + 0.25 × energy_proximity + 0.15 × acoustic_match
+
+Catalog → score each song → sort by score → return top-k
+```
+
+The scoring rule runs on one song at a time; the ranking rule sees all scores and picks the top-k. See [docs/scoring-logic.md](docs/scoring-logic.md) for the full math.
 
 ---
 
