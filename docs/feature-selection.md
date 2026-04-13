@@ -47,13 +47,15 @@
 - Score with: `song.acousticness` if `likes_acoustic` else `1 - song.acousticness`
 - Direct 1:1 mapping to `likes_acoustic` in UserProfile
 
+### valence
+- Correlated with mood but not redundant — two songs can share a mood label while differing in valence (e.g., lofi "chill" vs ambient "chill")
+- Breaks ties within the mid-energy cluster where genre and mood are both 0
+- Score with: `1 - abs(song.valence - user.target_valence)`
+- Direct 1:1 mapping to `target_valence` in UserProfile
+
 ---
 
 ## Tier 2 — Supplementary
-
-### valence
-- Correlated with mood (happy = high valence, moody = low) — reinforces the mood signal
-- No direct UserProfile field; useful as a secondary mood signal
 
 ### danceability
 - Captures a distinct axis from energy, though correlated
@@ -82,9 +84,10 @@ A weighted sum with all components normalized to [0, 1]:
 
 ```
 score = (0.35 × genre_match)
-      + (0.25 × mood_match)
+      + (0.20 × mood_match)
       + (0.25 × (1 - |song.energy - user.target_energy|))
-      + (0.15 × acousticness_score)
+      + (0.10 × (1 - |song.valence - user.target_valence|))
+      + (0.10 × acousticness_score)
 ```
 
 Where:
@@ -92,4 +95,4 @@ Where:
 - `mood_match` = 1 if `song.mood == user.favorite_mood` else 0
 - `acousticness_score` = `song.acousticness` if `user.likes_acoustic` else `1 - song.acousticness`
 
-**Weight rationale:** Genre is the strongest stated preference, mood is second, energy is the most discriminating numeric feature, and acousticness acts as a tie-breaker.
+**Weight rationale:** Genre is the strongest stated preference, energy is the most discriminating numeric feature, mood is a direct label match, and valence + acousticness act as continuous tie-breakers. Mood drops slightly from 0.25 to 0.20 since valence now covers part of its signal for songs where mood labels don't match.

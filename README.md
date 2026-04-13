@@ -17,33 +17,35 @@ Replace this paragraph with your own summary of what your version does.
 
 ## How The System Works
 
-### How Real-World Recommenders Work
+### Approach
 
-Real music recommenders blend two strategies:
-- **Collaborative filtering** — "users like you also liked X" — finds patterns across millions of listeners
-- **Content-based filtering** — matches songs to a taste profile using measurable audio features
-
-Both reduce to the same output: a score per song, then a ranked list.
-
-### What This Version Prioritizes
-
-This simulation uses **pure content-based filtering** — no listening history, no other users. Priorities in order: genre match → mood match → energy proximity → acoustic preference. Energy is scored by closeness to the user's target (not by raw magnitude), using a Gaussian bell curve.
-
-### Features Used
-
-**Song:** `genre` (string), `mood` (string), `energy` (float 0–1), `acousticness` (float 0–1). Fields `tempo_bpm`, `valence`, and `danceability` are stored but not yet scored.
-
-**UserProfile:** `favorite_genre`, `favorite_mood`, `target_energy` (float 0–1), `likes_acoustic` (bool).
-
-### Scoring and Ranking
+This simulation uses **content-based filtering** — no listening history, no other users. Each song in the catalog is scored independently against a user's taste profile, then the full list is sorted and the top-k results are returned.
 
 ```
-score = 0.35 × genre_match + 0.25 × mood_match + 0.25 × energy_proximity + 0.15 × acoustic_match
-
-Catalog → score each song → sort by score → return top-k
+songs.csv → score every song against UserProfile → sort by score → return top-k
 ```
 
-The scoring rule runs on one song at a time; the ranking rule sees all scores and picks the top-k. See [docs/scoring-logic.md](docs/scoring-logic.md) for the full math.
+### Algorithm Recipe
+
+Each song receives points in up to five categories. Higher points = better match.
+
+| Feature | Max pts | Rule |
+|---|---|---|
+| Genre match | +2.0 | +2.0 if `song.genre == user.favorite_genre`, else +0.0 |
+| Mood match | +1.0 | +1.0 if `song.mood == user.favorite_mood`, else +0.0 |
+| Energy proximity | +1.0 | Gaussian curve centered on `user.target_energy` (σ = 0.20) |
+| Valence proximity | +0.5 | Gaussian curve centered on `user.target_valence` (σ = 0.20) |
+| Acoustic fit | +0.5 | Rewards high acousticness if `likes_acoustic` is True, low if False |
+
+**Max possible score: 5.0.** The Gaussian curve returns 1.0 at a perfect match and decays smoothly — a song 0.10 away still scores ~0.88×, a song 0.30 away scores ~0.14×.
+
+**Why genre outweighs mood 2:1:** Genre encodes timbre, instrumentation, and production style — things you notice immediately. Mood is a softer label that often overlaps with energy and valence anyway, so it carries less independent information.
+
+### Known Biases
+
+- **Genre dominance.** A genre match is worth twice a mood match and twice the maximum energy score. A song that perfectly fits the user's mood, energy, and valence but has the wrong genre will almost always lose to a weaker same-genre song. Good cross-genre recommendations are largely invisible to this system.
+- **Sparse catalog amplifies misses.** With only 18 songs and ~15 distinct genres, most user profiles will match at most 1–2 songs on genre. The top result is often determined by which song happens to share the genre, not which is the best overall fit.
+- **Mood labels are coarse.** Two songs tagged "chill" can sound completely different (ambient vs. lofi). The system treats them as identical matches, which can produce results that feel off even when the score looks right.
 
 ---
 
