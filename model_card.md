@@ -76,7 +76,7 @@ The scores from all active signals are added up. The top 5 highest-scoring songs
 
 ### Profiles Tested
 
-We tested eight user profiles in total — three "standard" profiles designed to match songs we expected, and five "adversarial" profiles designed to break or stress-test the system.
+I tested eight user profiles in total — three "standard" profiles designed to match songs I expected, and five "adversarial" profiles designed to break or stress-test the system.
 
 **Standard profiles:**
 
@@ -88,7 +88,7 @@ We tested eight user profiles in total — three "standard" profiles designed to
 
 **Adversarial profiles:**
 
-| Profile | What we were testing |
+| Profile | What I was testing |
 |---|---|
 | Sad + High Energy (blues) | Contradictory mood vs. energy — can the system handle a request that no song satisfies? |
 | Unknown Genre (reggae) | No reggae in the catalog — does the fallback make any sense? |
@@ -98,13 +98,13 @@ We tested eight user profiles in total — three "standard" profiles designed to
 
 ---
 
-### What We Looked For
+### What I Looked For
 
-For each profile we asked: does the top-ranked song match what a real person with these preferences would actually want? We also compared positions 2–5 to see whether the runner-up results were plausible or surprising. When two profiles were similar (e.g., both asking for lofi), we checked whether the outputs were meaningfully different.
+For each profile I asked: does the top-ranked song match what a real person with these preferences would actually want? I also compared positions 2–5 to see whether the runner-up results were plausible or surprising. When two profiles were similar (e.g., both asking for lofi), I checked whether the outputs were meaningfully different.
 
 ---
 
-### What Surprised Us
+### What Surprised Me
 
 **1. "Gym Hero" keeps crashing the party.**
 
@@ -122,7 +122,7 @@ The Energy Midpoint EDM profile asked for edm, euphoric, energy=0.50. Signal Dro
 
 **4. The "impossible mood" lofi profile got perfectly reasonable results — accidentally.**
 
-The Impossible Mood Combo profile asked for lofi with an "aggressive" mood (which no lofi song has). Since mood is disabled, the system just ranked lofi songs by energy proximity. Focus Flow came out #1 with a perfect energy match. The results looked sensible, but only because we'd turned off the one signal that would have exposed the problem. If mood were active and scored 0 for every song (no match possible), the lofi genre songs would still win — but the explanation would reveal that the mood was never satisfied.
+The Impossible Mood Combo profile asked for lofi with an "aggressive" mood (which no lofi song has). Since mood is disabled, the system just ranked lofi songs by energy proximity. Focus Flow came out #1 with a perfect energy match. The results looked sensible, but only because I'd turned off the one signal that would have exposed the problem. If mood were active and scored 0 for every song (no match possible), the lofi genre songs would still win — but the explanation would reveal that the mood was never satisfied.
 
 **5. Chill Lofi's #1 result was a "focused" song, not a "chill" one.**
 
@@ -134,9 +134,9 @@ With mood disabled, Focus Flow (lofi, focused, energy=0.40) scored 2.98 and beat
 
 ### Experiment 1 — Removing the Mood Signal
 
-**What we changed:** The scoring function originally gave a song +1.5 points whenever its mood matched the user's preferred mood. We temporarily disabled that check to see how much the rankings actually depend on it.
+**What I changed:** The scoring function originally gave a song +1.5 points whenever its mood matched the user's preferred mood. I temporarily disabled that check to see how much the rankings actually depend on it.
 
-**Why:** We wanted to know whether mood was doing real work — or whether genre and energy were already enough to surface good results.
+**Why:** I wanted to know whether mood was doing real work — or whether genre and energy were already enough to surface good results.
 
 **How scores changed:**
 
