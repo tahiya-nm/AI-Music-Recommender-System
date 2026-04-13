@@ -86,144 +86,37 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Experiments You Tried
 
-Use this section to document the experiments you ran. For example:
+### System Overview
 
-- What happened when you changed the weight on genre from 2.0 to 0.5
-- What happened when you added tempo or valence to the score
-- How did your system behave for different types of users
+| | Image |
+|---|---|
+| **System flow diagram** — end-to-end architecture from `songs.csv` through the scoring formula to ranked output | ![System flow diagram](images/mermaid_diagram.png) |
+| **Initial terminal output** — recommendations produced by the default user profile on first run, before any profile variations were introduced | ![Initial terminal output](images/initial_output.png) |
 
 ---
 
-## Limitations and Risks
+### Profile Results
 
-Summarize some limitations of your recommender.
+| Profile | Description | Screenshot |
+|---|---|---|
+| **High-Energy Pop** | Standard profile: `genre=pop`, `mood=happy`, `energy=0.85`. Ideal match is "Sunrise City". Genre weight dominates — top results cluster around pop songs with energetic, happy moods. | ![High-Energy Pop](images/profile_high_energy_pop.png) |
+| **Chill Lofi** | Standard profile: `genre=lofi`, `mood=chill`, `energy=0.38`. Ideal matches are "Library Rain" and "Midnight Coding". Low energy target surfaces the quietest lofi tracks in the catalog. | ![Chill Lofi](images/profile_chill_lofi.png) |
+| **Deep Intense Rock** | Standard profile: `genre=rock`, `mood=intense`, `energy=0.92`. Ideal match is "Storm Runner". High energy + intense mood produces a tight top-5 with little score spread between results. | ![Deep Intense Rock](images/profile_deep_intense_rock.png) |
+| **Adversarial — Sad + High Energy** | Conflicting mood vs. energy: `genre=blues`, `mood=sad`, `energy=0.95`. No catalog song is both sad and high-energy. Scoring splits — "Rainy Day Blues" wins on genre+mood (score ~3.94) despite its energy (0.34) being far from the 0.95 target. | ![Sad High Energy Adversarial](images/adversarial_sad_high_energy.png) |
+| **Adversarial — Unknown Genre** | `genre=reggae` never appears in the catalog, so the genre bonus can never fire. Max achievable score drops to 2.5. The recommender silently falls back to mood+energy ranking, which can feel off for a user who wanted reggae specifically. | ![Unknown Genre Adversarial](images/adversarial_unknown_genre.png) |
+| **Adversarial — Energy Midpoint** | `genre=edm`, `mood=euphoric`, `energy=0.50`. No catalog song has exactly 0.50 energy, so the energy bonus is uniformly suppressed across all songs. Genre and mood dominate even more than usual, making energy nearly useless for tie-breaking. | ![Energy Midpoint Adversarial](images/adversarial_energy_midpoint.png) |
+| **Adversarial — Impossible Mood Combo** | `genre=lofi`, `mood=aggressive`. Aggressive never appears in lofi songs, permanently locking out the +1.5 mood bonus. Every lofi song earns the same genre bonus; only energy separates the top results. | ![Impossible Mood Adversarial](images/adversarial_impossible_mood.png) |
+| **Adversarial — Max Energy Boundary** | `genre=metal`, `mood=aggressive`, `energy=1.0`. At the boundary, the energy term collapses to the raw song energy value. Loud non-genre-match songs can outscore quieter genre matches, exposing a scoring vulnerability at the extreme. | ![Max Energy Adversarial](images/adversarial_max_energy.png) |
 
-Examples:
+---
 
-- It only works on a tiny catalog
-- It does not understand lyrics or language
-- It might over favor one genre or mood
+## Further Analysis
 
-You will go deeper on this in your model card.
+For a full breakdown of limitations, bias, evaluation findings, experiment log, future work, and personal reflection, see the [**Model Card**](model_card.md).
 
 ---
 
 ## Reflection
 
-Read and complete `model_card.md`:
-
-[**Model Card**](model_card.md)
-
-Write 1 to 2 paragraphs here about what you learned:
-
-- about how recommenders turn data into predictions
-- about where bias or unfairness could show up in systems like this
-
-
----
-
-## 7. `model_card_template.md`
-
-Combines reflection and model card framing from the Module 3 guidance. :contentReference[oaicite:2]{index=2}  
-
-```markdown
-# 🎧 Model Card - Music Recommender Simulation
-
-## 1. Model Name
-
-Give your recommender a name, for example:
-
-> VibeFinder 1.0
-
----
-
-## 2. Intended Use
-
-- What is this system trying to do
-- Who is it for
-
-Example:
-
-> This model suggests 3 to 5 songs from a small catalog based on a user's preferred genre, mood, and energy level. It is for classroom exploration only, not for real users.
-
----
-
-## 3. How It Works (Short Explanation)
-
-Describe your scoring logic in plain language.
-
-- What features of each song does it consider
-- What information about the user does it use
-- How does it turn those into a number
-
-Try to avoid code in this section, treat it like an explanation to a non programmer.
-
----
-
-## 4. Data
-
-Describe your dataset.
-
-- How many songs are in `data/songs.csv`
-- Did you add or remove any songs
-- What kinds of genres or moods are represented
-- Whose taste does this data mostly reflect
-
----
-
-## 5. Strengths
-
-Where does your recommender work well
-
-You can think about:
-- Situations where the top results "felt right"
-- Particular user profiles it served well
-- Simplicity or transparency benefits
-
----
-
-## 6. Limitations and Bias
-
-Where does your recommender struggle
-
-Some prompts:
-- Does it ignore some genres or moods
-- Does it treat all users as if they have the same taste shape
-- Is it biased toward high energy or one genre by default
-- How could this be unfair if used in a real product
-
----
-
-## 7. Evaluation
-
-How did you check your system
-
-Examples:
-- You tried multiple user profiles and wrote down whether the results matched your expectations
-- You compared your simulation to what a real app like Spotify or YouTube tends to recommend
-- You wrote tests for your scoring logic
-
-You do not need a numeric metric, but if you used one, explain what it measures.
-
----
-
-## 8. Future Work
-
-If you had more time, how would you improve this recommender
-
-Examples:
-
-- Add support for multiple users and "group vibe" recommendations
-- Balance diversity of songs instead of always picking the closest match
-- Use more features, like tempo ranges or lyric themes
-
----
-
-## 9. Personal Reflection
-
-A few sentences about what you learned:
-
-- What surprised you about how your system behaved
-- How did building this change how you think about real music recommenders
-- Where do you think human judgment still matters, even if the model seems "smart"
-
+- Recommenders don't need to "understand" music to produce recommendations that look believable — they just need a scoring formula and a sorted list. That's both the power and the problem: the output always looks confident, even when the reasoning behind it has completely broken down (see: the reggae fallback returning synthwave with no warning).
+- Bias here isn't a bug you can point to — it's structural. The genre bonus is worth twice the energy signal by design, which means a song with the wrong energy, wrong mood, and wrong feel will still outrank a near-perfect song from a different genre. That tradeoff felt reasonable when I set the weights; it felt less reasonable when I watched a country song land at #2 for an EDM user. The weights encode assumptions about what matters, and those assumptions are invisible unless you run adversarial cases on purpose.

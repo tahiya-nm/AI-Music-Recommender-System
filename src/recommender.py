@@ -82,9 +82,10 @@ def score_song(user_prefs: dict, song: dict) -> Tuple[float, List[str]]:
         total += 2.0
         reasons.append("genre match (+2.0)")
 
-    if song['mood'] == user_prefs['mood']:
-        total += 1.5
-        reasons.append("mood match (+1.5)")
+    # EXPERIMENT: mood check disabled — testing sensitivity of rankings without mood signal
+    # if song['mood'] == user_prefs['mood']:
+    #     total += 1.5
+    #     reasons.append("mood match (+1.5)")
 
     energy_score = max(0.0, min(1.0, 1.0 - abs(song['energy'] - user_prefs['energy'])))
     total += energy_score
