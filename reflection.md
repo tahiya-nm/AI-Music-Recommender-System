@@ -52,7 +52,7 @@ The EDM user's #2 is Porch Light Waiting, a country song. The metal user's #3 is
 
 **Why this matters:** When there's only one song in your genre, positions 2–5 are picked by energy proximity alone, with no regard for anything else. The EDM user at energy=0.50 pulls in mid-tempo songs from every genre — country, R&B, jazz — because those happen to cluster near the middle of the energy scale. The metal user at energy=1.0 pulls in every loud song regardless of genre, which is why a pop workout track lands on the list.
 
-In plain language: after the system gives you your one matching song, it essentially forgets what genre you asked for and starts recommending "songs that are the right speed." The results look plausible (the songs are energetic!) but they are not what the user asked for.
+After the system gives you your one matching song, it essentially forgets what genre you asked for and starts recommending "songs that are the right speed." The results look plausible (the songs are energetic!) but they are not what the user asked for.
 
 ---
 
